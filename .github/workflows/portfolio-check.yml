@@ -1,101 +1,101 @@
-name: Portfolio Health Check [cite: 92]
-on: [cite: 93]
-  schedule: [cite: 94]
-    - cron: '0 9 * * 1'    # todos los lunes a las 9am [cite: 95]
-  push: [cite: 96]
-    branches: [main] [cite: 97]
-  workflow_dispatch:         # permite correrlo manualmente [cite: 98]
+name: Portfolio Health Check
+on:
+  schedule:
+    - cron: '0 9 * * 1'    # todos los lunes a las 9am
+  push:
+    branches: [main]
+  workflow_dispatch:         # permite correrlo manualmente
 
-jobs: [cite: 99]
-  check-repos: [cite: 100]
-    name: Verificar repos del portfolio [cite: 101]
-    runs-on: ubuntu-latest [cite: 102]
-    steps: [cite: 103]
-      - name: Checkout portfolio [cite: 104]
-        uses: actions/checkout@v4 [cite: 105]
-      - name: Verificar que los repos existen y tienen README [cite: 106]
-        env: [cite: 107]
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }} [cite: 108]
-        run: | [cite: 109]
-          USUARIO="${{ github.repository_owner }}" [cite: 110]
-          REPOS=( [cite: 111]
-            "devops-TP01" [cite: 112]
-            "devops-TP02" [cite: 113]
-            "devops-TP03" [cite: 114]
-            "devops-TP04" [cite: 115]
-            "devops-TP05" [cite: 116]
-            "devops-TP06" [cite: 117]
-            "devops-TP08" [cite: 118]
-            "devops-TP09" [cite: 119]
-            "devops-TP10" [cite: 120]
-            "devops-TP11" [cite: 121]
-          ) [cite: 122]
-          ERRORES=0 [cite: 123]
-          echo "### Estado del portfolio" >> $GITHUB_STEP_SUMMARY [cite: 124]
-          echo "| Repo | Estado | Último commit |" >> $GITHUB_STEP_SUMMARY [cite: 125]
-          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY [cite: 126]
-          for REPO in "${REPOS[@]}"; do [cite: 127]
-            URL="https://api.github.com/repos/$USUARIO/$REPO" [cite: 128]
-            CODE=$(curl -s -o /dev/null -w "%{http_code}" \ [cite: 129]
-              -H "Authorization: token $GH_TOKEN" "$URL") [cite: 130]
-            if [ "$CODE" = "200" ]; then [cite: 131]
-              LAST=$(curl -s \ [cite: 132]
-                -H "Authorization: token $GH_TOKEN" \ [cite: 133]
-                "$URL/commits/main" | python3 -c \ [cite: 134]
-                "import sys,json; d=json.load(sys.stdin); \ [cite: 135]
-                print(d['commit']['committer']['date'][:10])" 2>/dev/null || echo "?") [cite: 136]
-              echo "  [OK]  $REPO (último commit: $LAST)" [cite: 137]
-              echo "| $REPO |  ✅  activo | $LAST |" >> $GITHUB_STEP_SUMMARY [cite: 138]
-            else [cite: 139]
-              echo "  [FAIL] $REPO no encontrado (HTTP $CODE)" [cite: 140]
-              echo "| $REPO |  ❌  no encontrado | — |" >> $GITHUB_STEP_SUMMARY [cite: 141]
-              ERRORES=$((ERRORES+1)) [cite: 142]
-            fi [cite: 143]
-          done [cite: 144]
-          echo "" [cite: 145]
-          echo "Total repos verificados: ${#REPOS[@]}" [cite: 146]
-          echo "Errores: $ERRORES" [cite: 147]
-          [ "$ERRORES" -eq 0 ] && exit 0 || exit 1 [cite: 148]
+jobs:
+  check-repos:
+    name: Verificar repos del portfolio
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout portfolio
+        uses: actions/checkout@v4
+      - name: Verificar que los repos existen y tienen README
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          USUARIO="${{ github.repository_owner }}"
+          REPOS=(
+            "devops-TP01"
+            "devops-TP02"
+            "devops-TP03"
+            "devops-TP04"
+            "devops-TP05"
+            "devops-TP06"
+            "devops-TP08"
+            "devops-TP09"
+            "devops-TP10"
+            "devops-TP11"
+          )
+          ERRORES=0
+          echo "### Estado del portfolio" >> $GITHUB_STEP_SUMMARY
+          echo "| Repo | Estado | Último commit |" >> $GITHUB_STEP_SUMMARY
+          echo "|---|---|---|" >> $GITHUB_STEP_SUMMARY
+          for REPO in "${REPOS[@]}"; do
+            URL="https://api.github.com/repos/$USUARIO/$REPO"
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+              -H "Authorization: token $GH_TOKEN" "$URL")
+            if [ "$CODE" = "200" ]; then
+              LAST=$(curl -s \
+                -H "Authorization: token $GH_TOKEN" \
+                "$URL/commits/main" | python3 -c \
+                "import sys,json; d=json.load(sys.stdin); \
+                print(d['commit']['committer']['date'][:10])" 2>/dev/null || echo "?")
+              echo "  [OK]  $REPO (último commit: $LAST)"
+              echo "| $REPO |  ✅  activo | $LAST |" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "  [FAIL] $REPO no encontrado (HTTP $CODE)"
+              echo "| $REPO |  ❌  no encontrado | — |" >> $GITHUB_STEP_SUMMARY
+              ERRORES=$((ERRORES+1))
+            fi
+          done
+          echo ""
+          echo "Total repos verificados: ${#REPOS[@]}"
+          echo "Errores: $ERRORES"
+          [ "$ERRORES" -eq 0 ] && exit 0 || exit 1
 
-  lint-readme: [cite: 149]
-    name: Lint del README principal [cite: 150]
-    runs-on: ubuntu-latest [cite: 151]
-    steps: [cite: 152]
-      - uses: actions/checkout@v4 [cite: 153]
-      - name: Verificar que el README tiene todas las secciones [cite: 154]
-        run: | [cite: 155]
-          SECCIONES=( [cite: 156]
-            "Stack tecnológico" [cite: 157]
-            "Proyectos por TP" [cite: 158]
-            "Mes 1" [cite: 159]
-            "Mes 2" [cite: 160]
-            "Mes 3" [cite: 161]
-            "Plataformas usadas" [cite: 162]
-          ) [cite: 163]
-          FALTANTES=0 [cite: 164]
-          for SEC in "${SECCIONES[@]}"; do [cite: 165]
-            if grep -q "$SEC" README.md; then [cite: 166]
-              echo "  [OK]  Sección: $SEC" [cite: 167]
-            else [cite: 168]
-              echo "  [FAIL] Falta sección: $SEC" [cite: 169]
-              FALTANTES=$((FALTANTES+1)) [cite: 170]
-            fi [cite: 171]
-          done [cite: 172]
-          [ "$FALTANTES" -eq 0 ] && echo "README completo" || exit 1 [cite: 173]
+  lint-readme:
+    name: Lint del README principal
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar que el README tiene todas las secciones
+        run: |
+          SECCIONES=(
+            "Stack tecnológico"
+            "Proyectos por TP"
+            "Mes 1"
+            "Mes 2"
+            "Mes 3"
+            "Plataformas usadas"
+          )
+          FALTANTES=0
+          for SEC in "${SECCIONES[@]}"; do
+            if grep -q "$SEC" README.md; then
+              echo "  [OK]  Sección: $SEC"
+            else
+              echo "  [FAIL] Falta sección: $SEC"
+              FALTANTES=$((FALTANTES+1))
+            fi
+          done
+          [ "$FALTANTES" -eq 0 ] && echo "README completo" || exit 1
 
-  generate-summary: [cite: 174]
-    name: Generar resumen del portfolio [cite: 175]
-    runs-on: ubuntu-latest [cite: 176]
-    needs: [check-repos, lint-readme] [cite: 177]
-    steps: [cite: 178]
-      - uses: actions/checkout@v4 [cite: 179]
-      - name: Generar stats del portfolio [cite: 180]
-        run: | [cite: 181]
-          echo "## Portfolio Stats — $(date '+%Y-%m-%d')" [cite: 182]
-          echo "" [cite: 183]
-          echo "- TPs completados: 12 / 12" [cite: 184]
-          echo "- Tecnologías cubiertas: $(grep -o '|.*|' README.md | wc -l) entradas en tabla de stack" [cite: 185]
-          echo "- Repos del portfolio: 11" [cite: 186]
-          echo "- Inversión total: \$0" [cite: 187]
-          echo "" [cite: 188]
-          echo "Pipeline corrido exitosamente" [cite: 189]
+  generate-summary:
+    name: Generar resumen del portfolio
+    runs-on: ubuntu-latest
+    needs: [check-repos, lint-readme]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generar stats del portfolio
+        run: |
+          echo "## Portfolio Stats — $(date '+%Y-%m-%d')"
+          echo ""
+          echo "- TPs completados: 12 / 12"
+          echo "- Tecnologías cubiertas: Completo"
+          echo "- Repos del portfolio: 11"
+          echo "- Inversión total: \$0"
+          echo ""
+          echo "Pipeline corrido exitosamente"
