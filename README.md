@@ -36,7 +36,7 @@ Aprendí DevOps desde cero en Operaciones1 usando únicamente herramientas gratu
 | 9 | App en Kubernetes | kubectl, Pods, Deployments, Services | [→ ver repo](https://github.com/Axel-Reynoso/devops-TP09) |
 | 10 | Helm Chart + Ingress | Helm, Ingress NGINX, HPA | [→ ver repo](https://github.com/Axel-Reynoso/devops-TP10) |
 | 11 | Infraestructura como Código | Terraform, módulos, state | [→ ver repo](https://github.com/Axel-Reynoso/devops-TP11) |
-| 12 | Portfolio final | GitHub Actions, integración | [→ este repo](https://github.com/Axel-Reynoso/devops-portfolio) |
+| 12 | Portfolio final | GitHub Actions, integración | [→ este repo](https://github.com/Axel-Reynoso/devops-TP12) |
 
 ---
 
